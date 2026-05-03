@@ -12,14 +12,18 @@ export default function PostDetailModal() {
 
   if (!isModal || !postId) return null;
 
-  const closeModal = () => {
-    navigate(-1);
-  };
+  const close = () => navigate(-1);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeModal}>
-      <div className="bg-background rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-        <PostDetailView postId={postId} onClose={closeModal} />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
+      onClick={close}
+    >
+      <div
+        className="bg-glass-strong rounded-2xl border border-glass-border-strong w-full max-w-2xl max-h-[90vh] overflow-auto animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <PostDetailView postId={postId} onClose={close} />
       </div>
     </div>
   );
