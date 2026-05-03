@@ -3,14 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../../apiCalls/auth.js";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/usersSlice.js";
+import { useSocket } from "../../context/SocketContext.jsx";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
+import AuthShell from "../AuthShell.jsx";
 
 export default function SignUp() {
   const [form, setForm] = useState({ firstname: "", lastname: "", email: "", password: "" });
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { connectSocket } = useSocket();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,60 +24,67 @@ export default function SignUp() {
     if (res.success) {
       dispatch(setUser(res.data.user));
       localStorage.setItem("token", res.data.token);
-      toast.success("Account created!");
+      connectSocket();
+      toast.success("Welcome to Nuvora!");
       navigate("/");
     } else toast.error(res.message || "Signup failed");
   };
 
+  const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="w-full max-w-sm">
-        <h1 className="text-3xl font-bold text-primary mb-6 text-center">Nuvora</h1>
-        <form onSubmit={handleSubmit} className="space-y-3">
+    <AuthShell title="Create your account" subtitle="Start sharing in seconds">
+      <form onSubmit={handleSubmit} className="space-y-3.5">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="relative">
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input value={form.firstname} onChange={update("firstname")} placeholder="First name" className="input pl-10" required />
+          </div>
+          <div className="relative">
+            <input value={form.lastname} onChange={update("lastname")} placeholder="Last name" className="input" required />
+          </div>
+        </div>
+        <div className="relative">
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input type="email" value={form.email} onChange={update("email")} placeholder="you@example.com" className="input pl-10" required />
+        </div>
+        <div className="relative">
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
-            type="text"
-            placeholder="First Name"
-            value={form.firstname}
-            onChange={(e) => setForm({ ...form, firstname: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-glass border border-glass-border text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 text-sm"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={form.lastname}
-            onChange={(e) => setForm({ ...form, lastname: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-glass border border-glass-border text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 text-sm"
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-glass border border-glass-border text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 text-sm"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
+            type={showPw ? "text" : "password"}
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-glass border border-glass-border text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 text-sm"
+            onChange={update("password")}
+            placeholder="Password (min 6 chars)"
+            className="input pl-10 pr-10"
+            minLength={6}
             required
           />
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center"
+            type="button"
+            onClick={() => setShowPw((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign Up"}
+            {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
-        </form>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Already have an account? <Link to="/login" className="text-primary font-semibold">Login</Link>
+        </div>
+
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          By signing up, you agree to our{" "}
+          <span className="text-primary story-link">Terms</span> and{" "}
+          <span className="text-primary story-link">Privacy Policy</span>.
         </p>
-      </div>
-    </div>
+
+        <button type="submit" disabled={loading} className="btn btn-primary w-full py-3 text-base">
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+            <>Create account <ArrowRight className="w-4 h-4" /></>
+          )}
+        </button>
+      </form>
+
+      <p className="text-center text-sm text-muted-foreground mt-8">
+        Already have an account?{" "}
+        <Link to="/login" className="text-primary font-semibold story-link">Sign in</Link>
+      </p>
+    </AuthShell>
   );
 }
