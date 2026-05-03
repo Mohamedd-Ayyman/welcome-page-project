@@ -108,13 +108,13 @@ export default function ExplorePage() {
           onSubmit={(e) => { e.preventDefault(); performSearch(query); }}
           className="relative mb-4 animate-fade-in"
         >
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search posts and people…"
-            className="input pl-11 pr-20 py-3 rounded-full text-base"
-          />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search posts and people…"
+              className="input pl-12 pr-20 py-3 rounded-full text-base"
+            />
           {query && (
             <button
               type="button"
@@ -185,7 +185,7 @@ export default function ExplorePage() {
                           <Avatar src={u.profilepic} name={`${u.firstname || ""} ${u.lastname || ""}`} size={42} ring online={u.isOnline} />
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-foreground truncate">{u.firstname} {u.lastname}</p>
-                            <p className="text-xs text-muted-foreground truncate">{u.bio || `@${u.email?.split("@")[0]}`}</p>
+                            <p className="text-xs text-muted-foreground truncate">{u.bio || ""}</p>
                           </div>
                         </div>
                         <button

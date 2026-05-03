@@ -94,7 +94,9 @@ export function Sidebar() {
             <p className="text-sm font-semibold text-foreground truncate">
               {user?.firstname} {user?.lastname}
             </p>
-            <p className="text-xs text-muted-foreground truncate">@{user?.email?.split("@")[0]}</p>
+            {user?.bio ? (
+              <p className="text-xs text-muted-foreground truncate">{user.bio}</p>
+            ) : null}
           </div>
         </Link>
         <Link to={ROUTES.SETTINGS} className="btn btn-ghost btn-icon" title="Settings">
@@ -194,7 +196,7 @@ export function TopBar({ title }) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search Nuvora…"
-              className="input pl-10"
+              className="input pl-11"
             />
           </form>
         </div>

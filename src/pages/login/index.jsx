@@ -98,7 +98,7 @@ function Field({ icon: Icon, rightIcon: RightIcon, onRightClick, ...rest }) {
   return (
     <div className="relative">
       {Icon && <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />}
-      <input {...rest} onChange={(e) => rest.onChange(e.target.value)} className="input pl-10 pr-10" required />
+      <input {...rest} onChange={(e) => rest.onChange(e.target.value)} className="input pl-11 pr-10" required />
       {RightIcon && (
         <button
           type="button"

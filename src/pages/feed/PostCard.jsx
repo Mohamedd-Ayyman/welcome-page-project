@@ -107,7 +107,7 @@ export default function PostCard({ post, currentUserId, onShare, index = 0 }) {
               {authorName || "Unknown"}
             </Link>
             <p className="text-xs text-muted-foreground">
-              @{author.email?.split("@")[0]} · {formatTime(post.createdAt)}
+              {formatTime(post.createdAt)}
             </p>
           </div>
         </div>

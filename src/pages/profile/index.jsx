@@ -33,7 +33,7 @@ import { EmptyProfilePostsState } from "../../components/EmptyStates.jsx";
 import toast from "react-hot-toast";
 
 export default function ProfilePage() {
-  const { userId } = useParams();
+  const { userId: rawUserId } = useParams();
   const { user } = useSelector((s) => s.userReducer);
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -45,8 +45,9 @@ export default function ProfilePage() {
   const [followLoading, setFollowLoading] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const targetId = userId || user?._id;
-  const isOwnProfile = !userId || userId === user?._id;
+  const normalizedUserId = rawUserId && rawUserId !== "undefined" && rawUserId !== "null" ? rawUserId : null;
+  const targetId = normalizedUserId || user?._id;
+  const isOwnProfile = !normalizedUserId || normalizedUserId === user?._id;
 
   useEffect(() => {
     if (!targetId) return;
@@ -152,7 +153,7 @@ export default function ProfilePage() {
           </div>
 
           <h1 className="text-2xl font-extrabold text-foreground tracking-tight">{fullName}</h1>
-          <p className="text-sm text-muted-foreground">@{profile.email?.split("@")[0]}</p>
+          {profile.bio ? null : <div className="h-1" />}
 
           {profile.bio && (
             <p className="text-sm text-foreground-soft mt-3 leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
@@ -175,8 +176,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 mt-5">
-            <Stat label="Posts" value={posts.length} onClick={() => setTab("posts")} active={tab === "posts"} />
+          <div className="grid grid-cols-4 gap-3 mt-5">
+            <Stat label="Posts" value={posts.length - posts.filter((p) => p.isRepost || p.originalPost).length} onClick={() => setTab("posts")} active={tab === "posts"} />
+            <Stat label="Reposts" value={posts.filter((p) => p.isRepost || p.originalPost).length} onClick={() => setTab("reposts")} active={tab === "reposts"} />
             <Stat label="Followers" value={followers.length} onClick={() => setTab("followers")} active={tab === "followers"} />
             <Stat label="Following" value={following.length} onClick={() => setTab("following")} active={tab === "following"} />
           </div>
@@ -187,6 +189,7 @@ export default function ProfilePage() {
           <div className="flex gap-1 p-1 bg-glass rounded-full">
             {[
               { id: "posts", label: "Posts", icon: Grid3X3 },
+              { id: "reposts", label: "Reposts", icon: Grid3X3 },
               { id: "followers", label: "Followers", icon: Users },
               { id: "following", label: "Following", icon: UserPlus },
               ...(isOwnProfile ? [{ id: "saved", label: "Saved", icon: Bookmark }] : []),
@@ -207,9 +210,20 @@ export default function ProfilePage() {
 
         <div className="px-4 sm:px-6 mt-4 space-y-3 animate-fade-in">
           {tab === "posts" && (
-            posts.length === 0 ? <EmptyProfilePostsState /> : posts.map((p, i) => (
-              <PostCard key={p._id} post={p} index={i} currentUserId={user?._id} />
-            ))
+            posts.filter((p) => !p.isRepost && !p.originalPost).length === 0 ? <EmptyProfilePostsState /> : posts
+              .filter((p) => !p.isRepost && !p.originalPost)
+              .map((p, i) => (
+                <PostCard key={p._id} post={p} index={i} currentUserId={user?._id} />
+              ))
+          )}
+          {tab === "reposts" && (
+            posts.filter((p) => p.isRepost || p.originalPost).length === 0 ? (
+              <p className="text-center text-muted-foreground py-12 text-sm">No reposts yet.</p>
+            ) : posts
+              .filter((p) => p.isRepost || p.originalPost)
+              .map((p, i) => (
+                <PostCard key={p._id} post={p.originalPost || p} index={i} currentUserId={user?._id} />
+              ))
           )}
           {(tab === "followers" || tab === "following") && (
             <UserList list={tab === "followers" ? followers : following} />
@@ -254,7 +268,7 @@ function UserList({ list }) {
           <Avatar src={u.profilepic} name={`${u.firstname || ""} ${u.lastname || ""}`} size={42} />
           <div className="min-w-0">
             <p className="text-sm font-bold text-foreground truncate">{u.firstname} {u.lastname}</p>
-            <p className="text-xs text-muted-foreground truncate">{u.bio || `@${u.email?.split("@")[0]}`}</p>
+            <p className="text-xs text-muted-foreground truncate">{u.bio || ""}</p>
           </div>
         </Link>
       ))}

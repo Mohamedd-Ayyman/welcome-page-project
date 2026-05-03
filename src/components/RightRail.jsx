@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, TrendingUp, UserPlus, Sparkles, Loader2 } from "lucide-react";
+import { Search, UserPlus, Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import Avatar from "./Avatar.jsx";
 import { ROUTES } from "../lib/constants.js";
@@ -8,7 +8,7 @@ import { getSuggestions, followUser } from "../apiCalls/follow.js";
 import toast from "react-hot-toast";
 
 /**
- * RightRail — Search bar, follow suggestions, trending topics.
+ * RightRail — Search bar, follow suggestions.
  * Hidden below xl breakpoint.
  */
 export default function RightRail() {
@@ -46,13 +46,6 @@ export default function RightRail() {
     }
   };
 
-  const trending = [
-    { tag: "#design", count: "12.4k" },
-    { tag: "#webdev", count: "8.1k" },
-    { tag: "#ai", count: "27.8k" },
-    { tag: "#startup", count: "5.2k" },
-  ];
-
   return (
     <aside className="hidden xl:block fixed top-0 right-0 h-screen w-[320px] p-4 overflow-y-auto z-20">
       <form onSubmit={submit} className="relative mb-4">
@@ -61,7 +54,7 @@ export default function RightRail() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search people, posts…"
-          className="input pl-10 rounded-full"
+          className="input pl-11 rounded-full"
         />
       </form>
 
@@ -86,7 +79,7 @@ export default function RightRail() {
                     <p className="text-sm font-semibold text-foreground truncate story-link">
                       {s.firstname} {s.lastname}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">@{s.email?.split("@")[0]}</p>
+                    <p className="text-xs text-muted-foreground truncate">{s.bio || ""}</p>
                   </div>
                 </Link>
                 <button
@@ -104,25 +97,6 @@ export default function RightRail() {
             ))}
           </div>
         )}
-      </div>
-
-      <div className="card p-4 mb-4 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-        <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="w-4 h-4 text-accent" />
-          <h3 className="text-sm font-bold text-foreground">Trending</h3>
-        </div>
-        <div className="space-y-1">
-          {trending.map((t) => (
-            <button
-              key={t.tag}
-              onClick={() => navigate(`${ROUTES.EXPLORE}?q=${encodeURIComponent(t.tag)}`)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left hover:bg-glass-hover transition-colors group"
-            >
-              <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{t.tag}</span>
-              <span className="text-xs text-muted-foreground">{t.count}</span>
-            </button>
-          ))}
-        </div>
       </div>
 
       <div className="text-[11px] text-muted-foreground-2 px-2 leading-relaxed">

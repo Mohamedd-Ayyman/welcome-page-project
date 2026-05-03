@@ -163,7 +163,7 @@ export default function ChatPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search conversations…"
-                className="input pl-10 rounded-full text-sm py-2"
+                className="input pl-11 rounded-full text-sm py-2"
               />
             </div>
           </div>

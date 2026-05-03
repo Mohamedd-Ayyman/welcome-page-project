@@ -38,7 +38,7 @@ export default function SignUp() {
         <div className="grid grid-cols-2 gap-3">
           <div className="relative">
             <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input value={form.firstname} onChange={update("firstname")} placeholder="First name" className="input pl-10" required />
+            <input value={form.firstname} onChange={update("firstname")} placeholder="First name" className="input pl-11" required />
           </div>
           <div className="relative">
             <input value={form.lastname} onChange={update("lastname")} placeholder="Last name" className="input" required />
@@ -46,7 +46,7 @@ export default function SignUp() {
         </div>
         <div className="relative">
           <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input type="email" value={form.email} onChange={update("email")} placeholder="you@example.com" className="input pl-10" required />
+          <input type="email" value={form.email} onChange={update("email")} placeholder="you@example.com" className="input pl-11" required />
         </div>
         <div className="relative">
           <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -55,7 +55,7 @@ export default function SignUp() {
             value={form.password}
             onChange={update("password")}
             placeholder="Password (min 6 chars)"
-            className="input pl-10 pr-10"
+            className="input pl-11 pr-10"
             minLength={6}
             required
           />
