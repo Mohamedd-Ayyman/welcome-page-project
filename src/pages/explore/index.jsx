@@ -1,43 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Search, TrendingUp, Globe, Loader2, UserX } from "lucide-react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Search, Compass, Users, FileText, Loader2, X, Flame } from "lucide-react";
 import AppLayout from "../../components/appLayout.jsx";
-import { searchPosts } from "../../apiCalls/post.js";
+import Avatar from "../../components/Avatar.jsx";
+import { searchPosts, getFeed } from "../../apiCalls/post.js";
 import { searchUsers } from "../../apiCalls/users.js";
 import { followUser, unfollowUser, getFollowStatus } from "../../apiCalls/follow.js";
 import PostCard from "../feed/PostCard.jsx";
 import toast from "react-hot-toast";
 import { useDebouncedSearch } from "../../hooks/use-debounce.js";
+import { ROUTES } from "../../lib/constants.js";
+import { EmptySearchState } from "../../components/EmptyStates.jsx";
+import { PostSkeleton, UserCardSkeleton } from "../../components/Skeletons.jsx";
 
-const ExplorePage = () => {
-  const [query, setQuery] = useState("");
+export default function ExplorePage() {
+  const [params, setParams] = useSearchParams();
+  const initialQ = params.get("q") || "";
+  const [query, setQuery] = useState(initialQ);
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [tab, setTab] = useState("all");
   const [followingMap, setFollowingMap] = useState({});
   const { user } = useSelector((s) => s.userReducer);
 
-  // Debounced search — cancels in-flight request on new keystroke
   const { search } = useDebouncedSearch(async (q) => {
     const [postRes, usersRes] = await Promise.all([searchPosts(q), searchUsers(q)]);
     return { postRes, usersRes };
   });
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  // Load trending posts when no search
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await getFeed();
+      if (!cancelled && res.success) setTrending(res.data || []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const performSearch = async (q) => {
+    if (!q.trim()) return;
     setLoading(true);
     setSearched(true);
-
-    const result = await search(query.trim());
-
+    setParams({ q });
+    const result = await search(q.trim());
     setLoading(false);
-    if (result?.postRes?.success) setPosts(result.postRes.data);
+    if (result?.postRes?.success) setPosts(result.postRes.data || []);
     if (result?.usersRes?.success) {
-      const filtered = result.usersRes.data.filter((u) => String(u._id) !== String(user?._id));
+      const filtered = (result.usersRes.data || []).filter((u) => String(u._id) !== String(user?._id));
       setUsers(filtered);
-
-      // Batch follow-status lookups
       await Promise.all(
         filtered.map(async (u) => {
           const status = await getFollowStatus(u._id);
@@ -49,112 +64,180 @@ const ExplorePage = () => {
     }
   };
 
+  // Auto-search if query in URL
+  useEffect(() => {
+    if (initialQ) performSearch(initialQ);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleFollowToggle = async (userId) => {
     const isFollowing = followingMap[userId];
+    setFollowingMap((p) => ({ ...p, [userId]: !isFollowing }));
     const res = isFollowing ? await unfollowUser(userId) : await followUser(userId);
-    if (res.success) {
-      setFollowingMap((prev) => ({ ...prev, [userId]: !isFollowing }));
+    if (!res.success) {
+      setFollowingMap((p) => ({ ...p, [userId]: isFollowing }));
+      toast.error(res.message || "Action failed");
+    } else {
       toast.success(isFollowing ? "Unfollowed" : "Following");
-    } else toast.error(res.message || "Action failed");
+    }
   };
 
+  const clear = () => {
+    setQuery("");
+    setSearched(false);
+    setPosts([]);
+    setUsers([]);
+    setParams({});
+  };
+
+  const showResults = searched;
+
   return (
-    <AppLayout>
-      <div className="max-w-xl mx-auto px-4 py-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
-              placeholder="Search posts and people..."
-              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-glass border border-glass-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors text-sm"
-            />
-          </div>
+    <AppLayout title="Explore">
+      <div className="max-w-2xl mx-auto px-3 sm:px-5 py-4 sm:py-6">
+        <div className="hidden lg:block mb-5 animate-fade-in-down">
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight flex items-center gap-2">
+            <Compass className="w-6 h-6 text-primary" />
+            Explore
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Discover people, posts and ideas</p>
+        </div>
+
+        {/* Search */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); performSearch(query); }}
+          className="relative mb-4 animate-fade-in"
+        >
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search posts and people…"
+            className="input pl-11 pr-20 py-3 rounded-full text-base"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={clear}
+              className="absolute right-20 top-1/2 -translate-y-1/2 btn btn-ghost btn-icon"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
           <button
-            onClick={handleSearch}
-            disabled={loading}
-            className="px-5 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50"
+            type="submit"
+            disabled={loading || !query.trim()}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 btn btn-primary px-4 py-1.5"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
           </button>
-        </div>
+        </form>
 
+        {/* Tabs */}
+        {showResults && (
+          <div className="flex gap-1 p-1 bg-glass rounded-full mb-4 animate-fade-in">
+            {[
+              { id: "all", label: "Top", icon: Flame },
+              { id: "people", label: `People${users.length ? ` (${users.length})` : ""}`, icon: Users },
+              { id: "posts", label: `Posts${posts.length ? ` (${posts.length})` : ""}`, icon: FileText },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+                  tab === t.id ? "bg-gradient-primary text-white" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <t.icon className="w-3.5 h-3.5" />
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Results */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <div className="space-y-3">
+            <UserCardSkeleton />
+            <UserCardSkeleton />
+            <PostSkeleton />
           </div>
-        ) : searched && posts.length === 0 && users.length === 0 ? (
-          <div className="text-center py-12">
-            <UserX className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-foreground font-semibold">No results for "{query}"</p>
-            <p className="text-muted-foreground text-sm mt-1">Try different keywords</p>
-          </div>
-        ) : (
-          <>
-            {users.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center space-x-2">
-                  <Globe className="w-4 h-4" />
-                  <span>People</span>
-                </h3>
-                <div className="space-y-2">
-                  {users.map((u) => (
-                    <div key={u._id} className="flex items-center justify-between bg-glass rounded-xl p-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          {u.profilepic ? (
-                            <img src={u.profilepic} alt="" className="w-9 h-9 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-glass-hover flex items-center justify-center text-foreground text-sm font-bold">
-                              {u.firstname?.[0]}
-                            </div>
-                          )}
-                          {u.isOnline && (
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{u.firstname} {u.lastname}</p>
-                          {u.bio && <p className="text-xs text-muted-foreground line-clamp-1">{u.bio}</p>}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleFollowToggle(u._id)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                          followingMap[u._id]
-                            ? "bg-glass-hover text-muted-foreground hover:bg-red-500/20 hover:text-red-400"
-                            : "bg-primary text-primary-foreground hover:bg-primary-hover"
-                        }`}
+        ) : showResults ? (
+          posts.length === 0 && users.length === 0 ? (
+            <EmptySearchState query={query} />
+          ) : (
+            <div className="space-y-5 animate-fade-in">
+              {(tab === "all" || tab === "people") && users.length > 0 && (
+                <section>
+                  {tab === "all" && (
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <Users className="w-3.5 h-3.5" /> People
+                    </h3>
+                  )}
+                  <div className="space-y-2 stagger">
+                    {users.map((u) => (
+                      <Link
+                        key={u._id}
+                        to={ROUTES.PROFILE_USER(u._id)}
+                        className="card card-interactive p-3 flex items-center justify-between gap-3"
                       >
-                        {followingMap[u._id] ? "Following" : "Follow"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {posts.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center space-x-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>Posts</span>
-                </h3>
-                {posts.map((post) => (
-                  <div key={post._id} className="mb-5">
-                    <PostCard post={post} currentUserId={user?._id} />
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar src={u.profilepic} name={`${u.firstname || ""} ${u.lastname || ""}`} size={42} ring online={u.isOnline} />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-foreground truncate">{u.firstname} {u.lastname}</p>
+                            <p className="text-xs text-muted-foreground truncate">{u.bio || `@${u.email?.split("@")[0]}`}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => { e.preventDefault(); handleFollowToggle(u._id); }}
+                          className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all flex-shrink-0 ${
+                            followingMap[u._id]
+                              ? "bg-glass-hover text-foreground border border-glass-border-strong"
+                              : "bg-gradient-primary text-white glow-primary-soft hover:scale-105"
+                          }`}
+                        >
+                          {followingMap[u._id] ? "Following" : "Follow"}
+                        </button>
+                      </Link>
+                    ))}
                   </div>
+                </section>
+              )}
+
+              {(tab === "all" || tab === "posts") && posts.length > 0 && (
+                <section>
+                  {tab === "all" && (
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" /> Posts
+                    </h3>
+                  )}
+                  <div className="space-y-4">
+                    {posts.map((p, i) => (
+                      <PostCard key={p._id} post={p} index={i} currentUserId={user?._id} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )
+        ) : (
+          /* Trending discover view */
+          <section>
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Flame className="w-3.5 h-3.5 text-primary" /> Trending now
+            </h3>
+            {trending.length === 0 ? (
+              <PostSkeleton />
+            ) : (
+              <div className="space-y-4">
+                {trending.slice(0, 10).map((p, i) => (
+                  <PostCard key={p._id} post={p} index={i} currentUserId={user?._id} />
                 ))}
               </div>
             )}
-          </>
+          </section>
         )}
       </div>
     </AppLayout>
   );
-};
-
-export default ExplorePage;
+}
