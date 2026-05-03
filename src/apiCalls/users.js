@@ -18,6 +18,15 @@ export const getAllUsers = async (page = 1) => {
   }
 };
 
+export const getUserById = async (userId) => {
+  try {
+    const response = await axiosInstance.get(`/api/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false };
+  }
+};
+
 export const updateProfile = async (data) => {
   try {
     const response = await axiosInstance.put("/api/user/update-profile", data);

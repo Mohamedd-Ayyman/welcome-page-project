@@ -9,6 +9,9 @@ export default function PostDetailView({ postId, onClose }) {
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(true);
+  const [commentsPage, setCommentsPage] = useState(1);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [hasMoreComments, setHasMoreComments] = useState(true);
   const { user } = useSelector((s) => s.userReducer);
 
   useEffect(() => {
@@ -18,12 +21,17 @@ export default function PostDetailView({ postId, onClose }) {
       setLoading(true);
       const [postRes, commentsRes] = await Promise.all([
         getPost(postId),
-        getComments(postId),
+        getComments(postId, 1, 5),
       ]);
 
       if (cancelled) return;
       if (postRes.success) setPost(postRes.data);
-      if (commentsRes.success) setComments(commentsRes.data || []);
+      if (commentsRes.success) {
+        const initialComments = commentsRes.data || [];
+        setComments(initialComments);
+        setHasMoreComments(initialComments.length === 5);
+        setCommentsPage(1);
+      }
       setLoading(false);
     };
 
@@ -38,10 +46,24 @@ export default function PostDetailView({ postId, onClose }) {
     if (!comment.trim()) return;
     const res = await addComment(postId, comment);
     if (res.success) {
-      setComments([...comments, res.data]);
+      setComments([res.data, ...comments]);
       setComment("");
       toast.success("Comment added!");
     }
+  };
+
+  const loadMoreComments = async () => {
+    if (commentsLoading || !hasMoreComments) return;
+    setCommentsLoading(true);
+    const nextPage = commentsPage + 1;
+    const res = await getComments(postId, nextPage, 5);
+    if (res.success) {
+      const nextComments = res.data || [];
+      setComments([...comments, ...nextComments]);
+      setCommentsPage(nextPage);
+      if (nextComments.length < 5) setHasMoreComments(false);
+    }
+    setCommentsLoading(false);
   };
 
   const handleLike = async () => {
@@ -169,6 +191,18 @@ export default function PostDetailView({ postId, onClose }) {
             </div>
           </div>
         ))}
+        ))}
+        {hasMoreComments && (
+          <div className="pt-2">
+            <button
+              onClick={loadMoreComments}
+              disabled={commentsLoading}
+              className="text-sm text-primary disabled:opacity-50"
+            >
+              {commentsLoading ? "Loading..." : "Load more"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

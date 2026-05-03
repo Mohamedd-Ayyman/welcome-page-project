@@ -30,7 +30,12 @@ export default function FeedPage() {
         ) : (
           <div className="space-y-4 mt-4">
             {posts.map((post) => (
-              <PostCard key={post._id} post={post} currentUserId={user?._id} />
+              <PostCard
+                key={post._id}
+                post={post}
+                currentUserId={user?._id}
+                onShare={(sharedPost) => setPosts([sharedPost, ...posts])}
+              />
             ))}
             {posts.length === 0 && (
               <p className="text-center text-muted-foreground py-12">No posts yet. Follow users to see their posts!</p>

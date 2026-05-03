@@ -94,9 +94,9 @@ export const likeComment = async (commentId) => {
   }
 };
 
-export const getComments = async (postId, page = 1) => {
+export const getComments = async (postId, page = 1, limit = 5) => {
   try {
-    const response = await axiosInstance.get(`/api/post/${postId}/comments?page=${page}`);
+    const response = await axiosInstance.get(`/api/post/${postId}/comments?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     return error.response?.data || { success: false };

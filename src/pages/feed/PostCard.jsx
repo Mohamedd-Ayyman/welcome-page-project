@@ -6,9 +6,9 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../lib/constants.js";
 
-export default function PostCard({ post, currentUserId }) {
+export default function PostCard({ post, currentUserId, onShare }) {
   const [liked, setLiked] = useState(post.likes?.includes(currentUserId));
-  const [likesCount, setLikesCount] = useState(post.likeCount ?? post.likes?.length || 0);
+  const [likesCount, setLikesCount] = useState(post.likeCount ?? post.likes?.length ?? 0);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
   const [commentsLoaded, setCommentsLoaded] = useState(false);
@@ -49,6 +49,7 @@ export default function PostCard({ post, currentUserId }) {
     if (res.success) {
       setShareCount((prev) => prev + 1);
       toast.success("Post shared!");
+      if (onShare) onShare(res.data);
     } else {
       toast.error(res.message || "Share failed");
     }

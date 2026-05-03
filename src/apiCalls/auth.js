@@ -26,3 +26,12 @@ export const logoutUser = async () => {
     return { success: false };
   }
 };
+
+export const changePassword = async (payload) => {
+  try {
+    const response = await axiosInstance.post("/api/auth/change-password", payload);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, message: "Something went wrong" };
+  }
+};
