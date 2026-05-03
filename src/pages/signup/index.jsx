@@ -21,11 +21,11 @@ export default function SignUp() {
     setLoading(true);
     const res = await signup(form);
     setLoading(false);
-    if (res.success) {
-      dispatch(setUser(res.data.user));
-      localStorage.setItem("token", res.data.token);
+    if (res.success && res.user) {
+      dispatch(setUser(res.user));
+      localStorage.setItem("token", res.token);
       connectSocket();
-      toast.success("Welcome to Nuvora!");
+      toast.success("Welcome to JULO!");
       navigate("/");
     } else toast.error(res.message || "Signup failed");
   };
@@ -54,9 +54,9 @@ export default function SignUp() {
             type={showPw ? "text" : "password"}
             value={form.password}
             onChange={update("password")}
-            placeholder="Password (min 6 chars)"
+            placeholder="Password (min 8 chars)"
             className="input pl-11 pr-10"
-            minLength={6}
+            minLength={8}
             required
           />
           <button

@@ -19,12 +19,20 @@ export const API = {
   AUTH_SIGNUP: "/api/auth/signup",
   AUTH_LOGIN: "/api/auth/login",
   AUTH_LOGOUT: "/api/auth/logout",
+  AUTH_CHANGE_PASSWORD: "/api/auth/change-password",
+  AUTH_REFRESH: "/api/auth/refresh",
 
   // User
   USER_ME: "/api/user/get-logged-in",
   USER_ALL: "/api/user/get-all-users",
   USER_UPDATE: "/api/user/update-profile",
   USER_UPLOAD_AVATAR: "/api/upload/avatar",
+  USER_UPLOAD_COVER: "/api/upload/cover",
+  USER_DEACTIVATE: "/api/user/deactivate",
+  USER_DELETE: "/api/user/account",
+  USER_SESSIONS: "/api/auth/sessions",
+  USER_NOTIFICATIONS: "/api/user/notifications",
+  USER_PRIVACY: "/api/user/privacy",
 
   // Chat
   CHAT_CREATE: "/api/chat/create-new-chat",
@@ -63,7 +71,16 @@ export const API = {
 
   // Upload
   UPLOAD_AVATAR: "/api/upload/avatar",
+  UPLOAD_COVER: "/api/upload/cover",
+  UPLOAD_STORY: "/api/upload/story",
   UPLOAD_POST_IMAGE: "/api/upload/post-image",
+
+  // Stories
+  STORIES_ALL: "/api/stories",
+  STORIES_MINE: "/api/stories/mine",
+  STORIES_CREATE: "/api/stories/create",
+  STORIES_VIEW: (id) => `/api/stories/${id}/view`,
+  STORIES_DELETE: (id) => `/api/stories/${id}`,
 };
 
 export const SOCKET_EVENTS = {

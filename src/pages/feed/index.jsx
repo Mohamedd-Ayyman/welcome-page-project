@@ -25,7 +25,9 @@ export default function FeedPage() {
       if (res.success) setPosts(res.data || []);
       setLoading(false);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -38,7 +40,9 @@ export default function FeedPage() {
               <Sparkles className="w-6 h-6 text-primary" />
               Your Feed
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Latest from people you follow</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Latest from people you follow
+            </p>
           </div>
         </div>
 
@@ -47,7 +51,6 @@ export default function FeedPage() {
           {[
             { id: "for-you", label: "For you" },
             { id: "following", label: "Following" },
-            { id: "trending", label: "Trending" },
           ].map((t) => (
             <button
               key={t.id}
@@ -66,7 +69,10 @@ export default function FeedPage() {
         <StoriesRail />
 
         <div className="mt-4">
-          <CreatePost user={user} onPostCreated={(p) => setPosts((prev) => [p, ...prev])} />
+          <CreatePost
+            user={user}
+            onPostCreated={(p) => setPosts((prev) => [p, ...prev])}
+          />
         </div>
 
         <div className="mt-5 space-y-4">

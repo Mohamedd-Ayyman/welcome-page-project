@@ -35,7 +35,7 @@ export default function AuthShell({ children, title, subtitle }) {
         </div>
 
         <div className="relative z-10 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Nuvora. All rights reserved.
+          © {new Date().getFullYear()} JULO. All rights reserved.
         </div>
       </div>
 

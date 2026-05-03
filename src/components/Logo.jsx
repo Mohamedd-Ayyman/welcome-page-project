@@ -15,9 +15,23 @@ export default function Logo({ size = 28, withText = true, className = "" }) {
           height={size * 0.6}
         >
           <path
-            d="M4 18V6L20 18V6"
+            d="M12 2L2 7L12 12L22 7L12 2Z"
             stroke="white"
-            strokeWidth="2.5"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M2 17L12 22L22 17"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M2 12L12 17L22 12"
+            stroke="white"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -28,7 +42,7 @@ export default function Logo({ size = 28, withText = true, className = "" }) {
           className="font-extrabold tracking-tight text-gradient-primary"
           style={{ fontSize: size * 0.7 }}
         >
-          Nuvora
+          JULO
         </span>
       )}
     </div>

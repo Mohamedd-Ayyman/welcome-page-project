@@ -20,7 +20,7 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden md:flex fixed top-0 left-0 h-screen w-64 flex-col bg-glass border-r border-glass-border p-4">
-      <div className="text-xl font-bold text-primary mb-8 px-3">Nuvora</div>
+      <div className="text-xl font-bold text-primary mb-8 px-3">JULO</div>
       <nav className="flex-1 space-y-1">
         {navItems.map(({ to, icon: Icon, label }) => (
           <Link

@@ -21,17 +21,17 @@ export default function Login() {
     setLoading(true);
     const res = await login(form);
     setLoading(false);
-    if (res.success) {
-      dispatch(setUser(res.data.user));
-      localStorage.setItem("token", res.data.token);
+    if (res.success && res.user) {
+      dispatch(setUser(res.user));
+      localStorage.setItem("token", res.token);
       connectSocket();
-      toast.success(`Welcome back, ${res.data.user.firstname}!`);
+      toast.success(`Welcome back, ${res.user.firstname}!`);
       navigate("/");
     } else toast.error(res.message || "Login failed");
   };
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue to Nuvora">
+    <AuthShell title="Welcome back" subtitle="Sign in to continue to JULO">
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <Field
           icon={Mail}
@@ -85,7 +85,7 @@ export default function Login() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground mt-8">
-        New to Nuvora?{" "}
+        New to JULO?{" "}
         <Link to="/signup" className="text-primary font-semibold story-link">
           Create an account
         </Link>

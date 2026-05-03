@@ -1,12 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, Compass, Users, FileText, Loader2, X, Flame } from "lucide-react";
+import {
+  Search,
+  Compass,
+  Users,
+  FileText,
+  Loader2,
+  X,
+  Flame,
+} from "lucide-react";
 import AppLayout from "../../components/appLayout.jsx";
 import Avatar from "../../components/Avatar.jsx";
 import { searchPosts, getFeed } from "../../apiCalls/post.js";
 import { searchUsers } from "../../apiCalls/users.js";
-import { followUser, unfollowUser, getFollowStatus } from "../../apiCalls/follow.js";
+import {
+  followUser,
+  unfollowUser,
+  getFollowStatus,
+} from "../../apiCalls/follow.js";
 import PostCard from "../feed/PostCard.jsx";
 import toast from "react-hot-toast";
 import { useDebouncedSearch } from "../../hooks/use-debounce.js";
@@ -28,7 +40,10 @@ export default function ExplorePage() {
   const { user } = useSelector((s) => s.userReducer);
 
   const { search } = useDebouncedSearch(async (q) => {
-    const [postRes, usersRes] = await Promise.all([searchPosts(q), searchUsers(q)]);
+    const [postRes, usersRes] = await Promise.all([
+      searchPosts(q),
+      searchUsers(q),
+    ]);
     return { postRes, usersRes };
   });
 
@@ -39,7 +54,9 @@ export default function ExplorePage() {
       const res = await getFeed();
       if (!cancelled && res.success) setTrending(res.data || []);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const performSearch = async (q) => {
@@ -51,15 +68,20 @@ export default function ExplorePage() {
     setLoading(false);
     if (result?.postRes?.success) setPosts(result.postRes.data || []);
     if (result?.usersRes?.success) {
-      const filtered = (result.usersRes.data || []).filter((u) => String(u._id) !== String(user?._id));
+      const filtered = (result.usersRes.data || []).filter(
+        (u) => String(u._id) !== String(user?._id),
+      );
       setUsers(filtered);
       await Promise.all(
         filtered.map(async (u) => {
           const status = await getFollowStatus(u._id);
           if (status.success) {
-            setFollowingMap((prev) => ({ ...prev, [u._id]: status.data.isFollowing }));
+            setFollowingMap((prev) => ({
+              ...prev,
+              [u._id]: status.data.isFollowing,
+            }));
           }
-        })
+        }),
       );
     }
   };
@@ -73,7 +95,9 @@ export default function ExplorePage() {
   const handleFollowToggle = async (userId) => {
     const isFollowing = followingMap[userId];
     setFollowingMap((p) => ({ ...p, [userId]: !isFollowing }));
-    const res = isFollowing ? await unfollowUser(userId) : await followUser(userId);
+    const res = isFollowing
+      ? await unfollowUser(userId)
+      : await followUser(userId);
     if (!res.success) {
       setFollowingMap((p) => ({ ...p, [userId]: isFollowing }));
       toast.error(res.message || "Action failed");
@@ -100,21 +124,26 @@ export default function ExplorePage() {
             <Compass className="w-6 h-6 text-primary" />
             Explore
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Discover people, posts and ideas</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Discover people, posts and ideas
+          </p>
         </div>
 
         {/* Search */}
         <form
-          onSubmit={(e) => { e.preventDefault(); performSearch(query); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            performSearch(query);
+          }}
           className="relative mb-4 animate-fade-in"
         >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search posts and people…"
-              className="input pl-12 pr-20 py-3 rounded-full text-base"
-            />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search posts and people…"
+            className="input pl-12 pr-20 py-3 rounded-full text-base"
+          />
           {query && (
             <button
               type="button"
@@ -138,14 +167,24 @@ export default function ExplorePage() {
           <div className="flex gap-1 p-1 bg-glass rounded-full mb-4 animate-fade-in">
             {[
               { id: "all", label: "Top", icon: Flame },
-              { id: "people", label: `People${users.length ? ` (${users.length})` : ""}`, icon: Users },
-              { id: "posts", label: `Posts${posts.length ? ` (${posts.length})` : ""}`, icon: FileText },
+              {
+                id: "people",
+                label: `People${users.length ? ` (${users.length})` : ""}`,
+                icon: Users,
+              },
+              {
+                id: "posts",
+                label: `Posts${posts.length ? ` (${posts.length})` : ""}`,
+                icon: FileText,
+              },
             ].map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all ${
-                  tab === t.id ? "bg-gradient-primary text-white" : "text-muted-foreground hover:text-foreground"
+                  tab === t.id
+                    ? "bg-gradient-primary text-white"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <t.icon className="w-3.5 h-3.5" />
@@ -182,14 +221,27 @@ export default function ExplorePage() {
                         className="card card-interactive p-3 flex items-center justify-between gap-3"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <Avatar src={u.profilepic} name={`${u.firstname || ""} ${u.lastname || ""}`} size={42} ring online={u.isOnline} />
+                          <Avatar
+                            src={u.profilepic}
+                            name={`${u.firstname || ""} ${u.lastname || ""}`}
+                            size={42}
+                            ring
+                            online={u.isOnline}
+                          />
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-foreground truncate">{u.firstname} {u.lastname}</p>
-                            <p className="text-xs text-muted-foreground truncate">{u.bio || ""}</p>
+                            <p className="text-sm font-bold text-foreground truncate">
+                              {u.firstname} {u.lastname}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {u.bio || ""}
+                            </p>
                           </div>
                         </div>
                         <button
-                          onClick={(e) => { e.preventDefault(); handleFollowToggle(u._id); }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleFollowToggle(u._id);
+                          }}
                           className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all flex-shrink-0 ${
                             followingMap[u._id]
                               ? "bg-glass-hover text-foreground border border-glass-border-strong"
@@ -213,30 +265,19 @@ export default function ExplorePage() {
                   )}
                   <div className="space-y-4">
                     {posts.map((p, i) => (
-                      <PostCard key={p._id} post={p} index={i} currentUserId={user?._id} />
+                      <PostCard
+                        key={p._id}
+                        post={p}
+                        index={i}
+                        currentUserId={user?._id}
+                      />
                     ))}
                   </div>
                 </section>
               )}
             </div>
           )
-        ) : (
-          /* Trending discover view */
-          <section>
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Flame className="w-3.5 h-3.5 text-primary" /> Trending now
-            </h3>
-            {trending.length === 0 ? (
-              <PostSkeleton />
-            ) : (
-              <div className="space-y-4">
-                {trending.slice(0, 10).map((p, i) => (
-                  <PostCard key={p._id} post={p} index={i} currentUserId={user?._id} />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        ) : null}
       </div>
     </AppLayout>
   );

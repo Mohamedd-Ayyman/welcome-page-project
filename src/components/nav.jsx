@@ -195,7 +195,7 @@ export function TopBar({ title }) {
               autoFocus
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search Nuvora…"
+              placeholder="Search JULO…"
               className="input pl-11"
             />
           </form>

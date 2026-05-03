@@ -100,7 +100,7 @@ export default function RightRail() {
       </div>
 
       <div className="text-[11px] text-muted-foreground-2 px-2 leading-relaxed">
-        © {new Date().getFullYear()} Nuvora · <span className="story-link">Privacy</span> · <span className="story-link">Terms</span> · <span className="story-link">About</span>
+        © {new Date().getFullYear()} JULO · <span className="story-link">Privacy</span> · <span className="story-link">Terms</span> · <span className="story-link">About</span>
       </div>
     </aside>
   );

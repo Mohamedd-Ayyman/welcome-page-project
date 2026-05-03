@@ -35,3 +35,14 @@ export const changePassword = async (payload) => {
     return error.response?.data || { success: false, message: "Something went wrong" };
   }
 };
+
+// ── Sessions management ───────────────────────────────────────────────
+
+export const refreshToken = async (refreshToken) => {
+  try {
+    const response = await axiosInstance.post("/api/auth/refresh", { refreshToken });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false };
+  }
+};

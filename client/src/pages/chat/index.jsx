@@ -422,7 +422,7 @@ const ChatPage = () => {
                 <Send className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-xl font-bold text-foreground mb-2">
-                QuickChat
+                JULO
               </h2>
               <p className="text-muted-foreground text-sm">
                 Select a conversation to start messaging
