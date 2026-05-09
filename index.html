@@ -6,6 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="JULO — connect, share, and engage in real time" />
     <title>JULO</title>
+    <script>
+      // Apply saved theme before paint to avoid flash. Default = cozy dusk.
+      (function () {
+        try {
+          var s = localStorage.getItem("julo_theme");
+          var t = s === "paper" || s === "light" ? "paper" : "dusk";
+          document.documentElement.setAttribute("data-theme", t);
+          var rm = localStorage.getItem("julo_reduced_motion");
+          if (rm === "true") document.documentElement.classList.add("reduced-motion");
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
