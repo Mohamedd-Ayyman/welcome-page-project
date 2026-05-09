@@ -37,8 +37,11 @@ function App() {
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    const theme = localStorage.getItem("julo_theme") || "light";
+    const stored = localStorage.getItem("julo_theme");
+    // Default to "dusk" (cozy warm-dark). Migrate legacy "light"/"midnight"/"ink" labels.
+    const theme = stored === "paper" || stored === "light" ? "paper" : "dusk";
     document.documentElement.setAttribute("data-theme", theme);
+    if (stored !== theme) localStorage.setItem("julo_theme", theme);
 
     const stored = localStorage.getItem("julo_reduced_motion");
     const systemPref =
